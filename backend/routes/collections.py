@@ -69,12 +69,32 @@ def list_collections():
 
         collector_id = int(get_jwt_identity())
 
+        collector = User.query.filter_by(
+            id=collector_id,
+            role="Collector"
+        ).first()
+
+        if not collector:
+            return jsonify({
+                "error": "Collector account not found"
+            }), 404
+
+        collector_zone = normalize_zone(collector.zone)
+
         jobs = (
             Collection.query
             .filter_by(collector_id=collector_id)
             .order_by(Collection.scheduled_date.asc())
             .all()
         )
+
+        # Only show jobs belonging to the collector's zone
+        jobs = [
+            job
+            for job in jobs
+            if job.bin
+            and normalize_zone(job.bin.zone) == collector_zone
+        ]
 
         results = []
 
@@ -362,7 +382,6 @@ def auto_schedule():
 
         if active_job:
 
-            # Make sure a pending job has the correct note.
             if active_job.status == "Pending":
 
                 active_job.notes = (
