@@ -26,6 +26,30 @@ collections_bp = Blueprint(
 
 
 # ==========================================================
+# ZONE HELPER
+# ==========================================================
+
+def normalize_zone(zone):
+    """
+    Converts:
+        A
+        Zone A
+        zone a
+        Zone Zone A
+
+    into:
+        A
+    """
+
+    value = str(zone or "").strip().upper()
+
+    while value.startswith("ZONE "):
+        value = value[5:].strip()
+
+    return value
+
+
+# ==========================================================
 # GET COLLECTIONS
 # ==========================================================
 
@@ -35,31 +59,155 @@ def list_collections():
 
     claims = get_jwt()
 
-    query = Collection.query
+    status_filter = request.args.get("status")
 
-    status = request.args.get("status")
+    # ======================================================
+    # COLLECTOR VIEW
+    # ======================================================
 
-    if status:
-        query = query.filter_by(status=status)
-
-    # Collectors only see their own assigned collections
     if claims.get("role") == "Collector":
 
         collector_id = int(get_jwt_identity())
 
-        query = query.filter_by(
-            collector_id=collector_id
+        jobs = (
+            Collection.query
+            .filter_by(collector_id=collector_id)
+            .order_by(Collection.scheduled_date.asc())
+            .all()
         )
 
-    jobs = (
-        query
+        results = []
+
+        for job in jobs:
+
+            data = job.to_dict()
+
+            # ------------------------------------------------
+            # Display Planned below 75%.
+            #
+            # IMPORTANT:
+            # The database still stores "Pending".
+            # "Planned" exists only in the API response.
+            # ------------------------------------------------
+
+            if (
+                job.status == "Pending"
+                and job.bin
+                and job.bin.current_fill_level < 75
+            ):
+                data["status"] = "Planned"
+
+            if status_filter:
+
+                if data["status"] != status_filter:
+                    continue
+
+            results.append(data)
+
+        return jsonify(results), 200
+
+    # ======================================================
+    # ADMIN VIEW
+    # ======================================================
+
+    bins = (
+        Bin.query
+        .order_by(Bin.id.asc())
+        .all()
+    )
+
+    # ------------------------------------------------------
+    # Make sure every bin has an active collection job.
+    #
+    # Existing completed/missed jobs are kept as history.
+    # A new Pending job is created only when there is no
+    # active Pending/In Progress job for that bin.
+    # ------------------------------------------------------
+
+    changed = False
+
+    for bin_obj in bins:
+
+        active_job = (
+            Collection.query
+            .filter(
+                Collection.bin_id == bin_obj.id,
+                Collection.status.in_(
+                    ["Pending", "In Progress"]
+                )
+            )
+            .order_by(Collection.id.desc())
+            .first()
+        )
+
+        if not active_job:
+
+            new_job = Collection(
+                bin_id=bin_obj.id,
+                collector_id=None,
+                scheduled_date=datetime.utcnow(),
+                status="Pending",
+                notes="Planned collection"
+            )
+
+            db.session.add(new_job)
+
+            changed = True
+
+    if changed:
+        db.session.commit()
+
+    # ------------------------------------------------------
+    # Get active jobs for all bins.
+    # ------------------------------------------------------
+
+    active_jobs = (
+        Collection.query
+        .filter(
+            Collection.status.in_(
+                ["Pending", "In Progress"]
+            )
+        )
         .order_by(Collection.scheduled_date.asc())
         .all()
     )
 
-    return jsonify(
-        [collection.to_dict() for collection in jobs]
-    ), 200
+    results = []
+
+    for job in active_jobs:
+
+        if not job.bin:
+            continue
+
+        data = job.to_dict()
+
+        # --------------------------------------------------
+        # 75% THRESHOLD
+        #
+        # Below 75% = Planned
+        # 75% and above = Pending
+        #
+        # "Planned" is only a display value.
+        # The database enum remains valid.
+        # --------------------------------------------------
+
+        if (
+            job.status == "Pending"
+            and job.bin.current_fill_level < 75
+        ):
+            data["status"] = "Planned"
+
+        else:
+            data["status"] = job.status
+
+        if status_filter:
+
+            if data["status"] != status_filter:
+                continue
+
+        results.append(data)
+
+    return jsonify(results), 200
 
 
 # ==========================================================
@@ -75,11 +223,13 @@ def create_collection():
     data = request.get_json(force=True) or {}
 
     if not data.get("bin_id"):
+
         return jsonify({
             "error": "bin_id is required"
         }), 400
 
     if not data.get("scheduled_date"):
+
         return jsonify({
             "error": "scheduled_date is required"
         }), 400
@@ -102,6 +252,10 @@ def create_collection():
 
     collector_id = data.get("collector_id")
 
+    # ------------------------------------------------------
+    # VALIDATE COLLECTOR
+    # ------------------------------------------------------
+
     if collector_id:
 
         collector = User.query.filter_by(
@@ -115,6 +269,18 @@ def create_collection():
                 "error": "Invalid collector"
             }), 400
 
+        # Collector must belong to same zone as bin
+        if normalize_zone(collector.zone) != normalize_zone(bin_obj.zone):
+
+            return jsonify({
+                "error":
+                    "Collector must belong to the same zone as the bin"
+            }), 400
+
+    # ------------------------------------------------------
+    # CREATE JOB
+    # ------------------------------------------------------
+
     job = Collection(
         bin_id=bin_obj.id,
         collector_id=collector_id,
@@ -124,7 +290,10 @@ def create_collection():
 
     db.session.add(job)
 
-    # Notify collector
+    # ------------------------------------------------------
+    # NOTIFY COLLECTOR
+    # ------------------------------------------------------
+
     if collector_id:
 
         db.session.add(
@@ -176,7 +345,10 @@ def auto_schedule():
 
     for bin_obj in full_bins:
 
-        # Do not create duplicate active jobs
+        # --------------------------------------------------
+        # Do not create duplicate active jobs.
+        # --------------------------------------------------
+
         active_job = (
             Collection.query
             .filter(
@@ -189,11 +361,25 @@ def auto_schedule():
         )
 
         if active_job:
+
+            # Make sure a pending job has the correct note.
+            if active_job.status == "Pending":
+
+                active_job.notes = (
+                    "Auto-scheduled: bin near capacity"
+                )
+
             continue
+
+        # --------------------------------------------------
+        # Create a new pending job.
+        # --------------------------------------------------
 
         job = Collection(
             bin_id=bin_obj.id,
+            collector_id=None,
             scheduled_date=datetime.utcnow(),
+            status="Pending",
             notes="Auto-scheduled: bin near capacity"
         )
 
@@ -264,6 +450,12 @@ def update_collection(collection_id):
 
         new_status = data["status"]
 
+        # "Planned" is a display-only status.
+        # Never store it in the database enum.
+        if new_status == "Planned":
+
+            new_status = "Pending"
+
         allowed_statuses = [
             "Pending",
             "In Progress",
@@ -290,7 +482,6 @@ def update_collection(collection_id):
 
             if job.bin:
 
-                # Empty the physical bin
                 job.bin.current_fill_level = 0
 
                 job.bin.status = "Empty"
@@ -308,7 +499,7 @@ def update_collection(collection_id):
             job.completed_at = None
 
         # --------------------------------------------------
-        # COLLECTION REOPENED / MISSED
+        # COLLECTION REOPENED / MISSED / PENDING
         # --------------------------------------------------
 
         else:
@@ -345,9 +536,20 @@ def update_collection(collection_id):
                         "Invalid collector"
                 }), 400
 
+            # Collector must belong to same zone as bin
+            if normalize_zone(collector.zone) != normalize_zone(job.bin.zone):
+
+                return jsonify({
+                    "error":
+                        "Collector must belong to the same zone as the bin"
+                }), 400
+
         job.collector_id = collector_id
 
-        # Notify newly assigned collector
+        # --------------------------------------------------
+        # NOTIFY COLLECTOR
+        # --------------------------------------------------
+
         if collector_id:
 
             db.session.add(
