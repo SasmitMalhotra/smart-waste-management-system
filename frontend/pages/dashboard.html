@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Citizen Dashboard | Smart Waste</title>
+<link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">♻</div>
+        <div>
+          <h1>Smart Waste</h1>
+          <span>Citizen Portal</span>
+        </div>
+      </div>
+      <a class="nav-link active" href="dashboard.html">🗑 Nearby Bins</a>
+      <a class="nav-link" href="complaints.html">📢 My Complaints</a>
+      <a class="nav-link" href="notifications.html">🔔 Notifications</a>
+      <div class="sidebar-footer">
+        <div id="userName">—</div>
+        <a href="#" onclick="Auth.logout()" style="color:#fff;text-decoration:underline">Logout</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2>Nearby Waste Bins</h2>
+          <div class="subtitle">Live fill-level status reported by smart sensors</div>
+        </div>
+        <div>
+          <select id="zoneFilter" onchange="loadBins()">
+            <option value="">All Zones</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div id="binGrid" class="bin-grid"></div>
+      </div>
+
+      <div class="panel">
+        <h3>Report an Issue</h3>
+        <form id="complaintForm">
+          <label for="complaintBin">Related Bin (optional)</label>
+          <select id="complaintBin"><option value="">— General complaint —</option></select>
+
+          <label for="complaintReason">Describe the issue</label>
+          <textarea id="complaintReason" rows="3" required placeholder="e.g. Bin overflowing since yesterday"></textarea>
+
+          <button type="submit">Submit Complaint</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>

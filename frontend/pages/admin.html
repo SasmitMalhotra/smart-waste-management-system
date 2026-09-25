@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>Admin Dashboard | Smart Waste</title>
+
+  <link
+    rel="stylesheet"
+    href="../css/style.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+
+</head>
+
+
+<body>
+
+  <div class="app-shell">
+
+
+    <!-- ==================================================
+         SIDEBAR
+         ================================================== -->
+
+    <aside class="sidebar">
+
+      <div class="brand">
+
+        <div class="logo">
+          ♻
+        </div>
+
+        <div>
+
+          <h1>
+            Smart Waste
+          </h1>
+
+          <span>
+            Admin Portal
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <a
+        class="nav-link active"
+        href="admin.html"
+      >
+        📊 Dashboard
+      </a>
+
+
+      <a
+        class="nav-link"
+        href="notifications.html"
+      >
+        🔔 Notifications
+      </a>
+
+
+      <div class="sidebar-footer">
+
+        <div id="userName">
+          —
+        </div>
+
+        <a
+          href="#"
+          onclick="Auth.logout(); return false;"
+          style="
+            color:#fff;
+            text-decoration:underline;
+          "
+        >
+          Logout
+        </a>
+
+      </div>
+
+    </aside>
+
+
+    <!-- ==================================================
+         MAIN
+         ================================================== -->
+
+    <main class="main">
+
+
+      <!-- TOP BAR -->
+
+      <div class="topbar">
+
+        <div>
+
+          <h2>
+            Admin Dashboard
+          </h2>
+
+          <div class="subtitle">
+            City-wide waste bin monitoring and management
+          </div>
+
+        </div>
+
+
+        <button
+          onclick="autoSchedule()"
+        >
+          Auto-schedule full bins
+        </button>
+
+      </div>
+
+
+      <!-- ==================================================
+           STATISTICS
+           ================================================== -->
+
+      <div
+        class="stat-grid"
+        id="statGrid"
+      ></div>
+
+
+      <!-- ==================================================
+           ZONE OVERVIEW
+           ================================================== -->
+
+      <div class="panel">
+
+        <div class="zone-section-header">
+
+          <div>
+
+            <h3>
+              📍 Zone Overview
+            </h3>
+
+            <div class="map-subtitle">
+              Citizens, collectors and waste bins by zone
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="zoneGrid"
+          class="zone-grid"
+        >
+
+          <!-- Filled by admin.js -->
+
+          <div class="zone-card">
+
+            <div class="zone-card-header">
+
+              <div>
+
+                <div class="zone-card-title">
+                  Zone A
+                </div>
+
+                <div class="zone-card-location">
+                  Assigned area
+                </div>
+
+              </div>
+
+              <span class="zone-badge">
+                📍 Zone A
+              </span>
+
+            </div>
+
+
+            <div class="zone-counts">
+
+              <div class="zone-count">
+
+                <strong>
+                  3
+                </strong>
+
+                <span>
+                  Citizens
+                </span>
+
+              </div>
+
+
+              <div class="zone-count">
+
+                <strong>
+                  2
+                </strong>
+
+                <span>
+                  Collectors
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="zone-card">
+
+            <div class="zone-card-header">
+
+              <div>
+
+                <div class="zone-card-title">
+                  Zone B
+                </div>
+
+                <div class="zone-card-location">
+                  Assigned area
+                </div>
+
+              </div>
+
+              <span class="zone-badge">
+                📍 Zone B
+              </span>
+
+            </div>
+
+
+            <div class="zone-counts">
+
+              <div class="zone-count">
+
+                <strong>
+                  3
+                </strong>
+
+                <span>
+                  Citizens
+                </span>
+
+              </div>
+
+
+              <div class="zone-count">
+
+                <strong>
+                  2
+                </strong>
+
+                <span>
+                  Collectors
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="zone-card">
+
+            <div class="zone-card-header">
+
+              <div>
+
+                <div class="zone-card-title">
+                  Zone C
+                </div>
+
+                <div class="zone-card-location">
+                  Assigned area
+                </div>
+
+              </div>
+
+              <span class="zone-badge">
+                📍 Zone C
+              </span>
+
+            </div>
+
+
+            <div class="zone-counts">
+
+              <div class="zone-count">
+
+                <strong>
+                  3
+                </strong>
+
+                <span>
+                  Citizens
+                </span>
+
+              </div>
+
+
+              <div class="zone-count">
+
+                <strong>
+                  2
+                </strong>
+
+                <span>
+                  Collectors
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="zone-card">
+
+            <div class="zone-card-header">
+
+              <div>
+
+                <div class="zone-card-title">
+                  Zone D
+                </div>
+
+                <div class="zone-card-location">
+                  Assigned area
+                </div>
+
+              </div>
+
+              <span class="zone-badge">
+                📍 Zone D
+              </span>
+
+            </div>
+
+
+            <div class="zone-counts">
+
+              <div class="zone-count">
+
+                <strong>
+                  3
+                </strong>
+
+                <span>
+                  Citizens
+                </span>
+
+              </div>
+
+
+              <div class="zone-count">
+
+                <strong>
+                  2
+                </strong>
+
+                <span>
+                  Collectors
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="zone-card">
+
+            <div class="zone-card-header">
+
+              <div>
+
+                <div class="zone-card-title">
+                  Zone E
+                </div>
+
+                <div class="zone-card-location">
+                  Assigned area
+                </div>
+
+              </div>
+
+              <span class="zone-badge">
+                📍 Zone E
+              </span>
+
+            </div>
+
+
+            <div class="zone-counts">
+
+              <div class="zone-count">
+
+                <strong>
+                  3
+                </strong>
+
+                <span>
+                  Citizens
+                </span>
+
+              </div>
+
+
+              <div class="zone-count">
+
+                <strong>
+                  2
+                </strong>
+
+                <span>
+                  Collectors
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           LIVE MAP
+           ================================================== -->
+
+      <div class="panel">
+
+        <div class="map-header">
+
+          <div>
+
+            <h3>
+              🗺️ Live Collection Map
+            </h3>
+
+            <div class="map-subtitle">
+              Live bins and collector locations
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn-outline btn-sm"
+            onclick="centerMapOnAll()"
+          >
+            ⛶ Fit Map
+          </button>
+
+        </div>
+
+
+        <div id="wasteMap"></div>
+
+
+        <div class="map-legend">
+
+          <span>
+            <span class="legend-dot empty"></span>
+            Empty
+          </span>
+
+          <span>
+            <span class="legend-dot warning"></span>
+            Warning
+          </span>
+
+          <span>
+            <span class="legend-dot full"></span>
+            Full
+          </span>
+
+          <span>
+            <span class="legend-dot collector"></span>
+            Collector
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           BINS
+           ================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-heading-row">
+
+          <h3>
+            All Bins
+          </h3>
+
+
+          <button
+            class="btn-outline btn-sm"
+            onclick="toggleBinForm()"
+          >
+            + Add Bin
+          </button>
+
+        </div>
+
+
+        <!-- ADD BIN -->
+
+        <form
+          id="newBinForm"
+          class="zone-form-grid"
+          style="display:none;"
+        >
+
+          <div>
+
+            <label>
+              Bin Code
+            </label>
+
+            <input
+              id="binCode"
+              required
+              placeholder="BIN-D401"
+            />
+
+          </div>
+
+
+          <div>
+
+            <label>
+              Zone
+            </label>
+
+            <div class="zone-select-wrap">
+
+              <span class="zone-select-icon">
+                📍
+              </span>
+
+              <select
+                id="binZone"
+                required
+              >
+
+                <option
+                  value=""
+                  disabled
+                  selected
+                >
+                  Select bin zone
+                </option>
+
+                <option value="Zone A">
+                  Zone A
+                </option>
+
+                <option value="Zone B">
+                  Zone B
+                </option>
+
+                <option value="Zone C">
+                  Zone C
+                </option>
+
+                <option value="Zone D">
+                  Zone D
+                </option>
+
+                <option value="Zone E">
+                  Zone E
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div class="full-width">
+
+            <label>
+              Location
+            </label>
+
+            <div class="location-input-row">
+
+              <input
+                id="binLocation"
+                required
+                placeholder="Makarpura Road, Vadodara"
+              />
+
+              <button
+                type="button"
+                class="btn-outline btn-sm"
+                onclick="findBinLocation()"
+              >
+                📍 Find Location
+              </button>
+
+            </div>
+
+
+            <div
+              id="locationStatus"
+              class="location-status"
+            ></div>
+
+          </div>
+
+
+          <div>
+
+            <label>
+              Latitude
+            </label>
+
+            <input
+              id="binLatitude"
+              type="number"
+              step="any"
+              placeholder="22.3072"
+            />
+
+          </div>
+
+
+          <div>
+
+            <label>
+              Longitude
+            </label>
+
+            <input
+              id="binLongitude"
+              type="number"
+              step="any"
+              placeholder="73.1812"
+            />
+
+          </div>
+
+
+          <div>
+
+            <label>
+              Waste Type
+            </label>
+
+            <select id="binWasteType">
+
+              <option value="General">
+                General
+              </option>
+
+              <option value="Recyclable">
+                Recyclable
+              </option>
+
+              <option value="Organic">
+                Organic
+              </option>
+
+              <option value="Hazardous">
+                Hazardous
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div>
+
+            <label>
+              Capacity (Litres)
+            </label>
+
+            <input
+              id="binCapacity"
+              type="number"
+              min="1"
+              value="100"
+            />
+
+          </div>
+
+
+          <div class="full-width">
+
+            <button
+              type="submit"
+            >
+              Create Bin
+            </button>
+
+          </div>
+
+        </form>
+
+
+        <div
+          id="binGrid"
+          class="bin-grid"
+        ></div>
+
+      </div>
+
+
+      <!-- ==================================================
+           COMPLAINTS
+           ================================================== -->
+
+      <div class="panel">
+
+        <h3>
+          Pending Complaints
+        </h3>
+
+
+        <div style="overflow-x:auto">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>#</th>
+                <th>Reporter</th>
+                <th>Bin</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody
+              id="complaintRows"
+            ></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           COLLECTION JOBS
+           ================================================== -->
+
+      <div class="panel">
+
+        <h3>
+          Collection Jobs
+        </h3>
+
+
+        <div style="overflow-x:auto">
+
+          <table>
+
+            <thead>
+
+              <tr>
+
+                <th>
+                  Bin
+                </th>
+
+                <th>
+                  Collector
+                </th>
+
+                <th>
+                  Scheduled
+                </th>
+
+                <th>
+                  Status
+                </th>
+
+                <th>
+                  Fill
+                </th>
+
+                <th>
+                  Action
+                </th>
+
+              </tr>
+
+            </thead>
+
+
+            <tbody
+              id="collectionRows"
+            ></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+
+
+  <script src="../js/api.js"></script>
+
+  <script src="../js/admin.js"></script>
+
+</body>
+
+</html>

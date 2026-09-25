@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Complaints | Smart Waste</title>
+<link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">♻</div>
+        <div><h1>Smart Waste</h1><span>Citizen Portal</span></div>
+      </div>
+      <a class="nav-link" href="dashboard.html">🗑 Nearby Bins</a>
+      <a class="nav-link active" href="complaints.html">📢 My Complaints</a>
+      <a class="nav-link" href="notifications.html">🔔 Notifications</a>
+      <div class="sidebar-footer">
+        <div id="userName">—</div>
+        <a href="#" onclick="Auth.logout()" style="color:#fff;text-decoration:underline">Logout</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2>My Complaints</h2>
+          <div class="subtitle">Track the status of issues you've reported</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <table>
+          <thead>
+            <tr><th>#</th><th>Bin</th><th>Reason</th><th>Status</th><th>Reported</th></tr>
+          </thead>
+          <tbody id="complaintRows"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none">You haven't filed any complaints yet.</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script>
+    const user = Auth.requireAuth(["Citizen"]);
+    if (user) document.getElementById("userName").textContent = `${user.full_name} (Citizen)`;
+
+    async function loadComplaints() {
+      try {
+        const complaints = await apiRequest("/complaints");
+        const rows = document.getElementById("complaintRows");
+        document.getElementById("emptyState").style.display = complaints.length ? "none" : "block";
+        rows.innerHTML = complaints
+          .map(
+            (c) => `
+          <tr>
+            <td>#${c.id}</td>
+            <td>${c.bin_code || "—"}</td>
+            <td>${c.reason}</td>
+            <td><span class="badge ${c.status.replace(" ", "")}">${c.status}</span></td>
+            <td>${formatDate(c.reported_at)}</td>
+          </tr>`
+          )
+          .join("");
+      } catch (err) {
+        showToast(err.message);
+      }
+    }
+    loadComplaints();
+  </script>
+</body>
+</html>

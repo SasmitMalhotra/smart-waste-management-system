@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Collector Dashboard | Smart Waste</title>
+
+  <link
+    rel="stylesheet"
+    href="../css/style.css"
+  >
+
+</head>
+
+
+<body>
+
+  <div class="app-shell">
+
+
+    <!-- ==================================================
+         SIDEBAR
+         ================================================== -->
+
+    <aside class="sidebar">
+
+
+      <div class="brand">
+
+        <div class="logo">
+          ♻
+        </div>
+
+        <div>
+
+          <h1>
+            Smart Waste
+          </h1>
+
+          <span>
+            Collector Portal
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <a
+        class="nav-link active"
+        href="collector.html"
+      >
+        🚛 My Collections
+      </a>
+
+
+      <a
+        class="nav-link"
+        href="notifications.html"
+      >
+        🔔 Notifications
+      </a>
+
+
+      <div class="sidebar-footer">
+
+        <div id="userName">
+          —
+        </div>
+
+        <a
+          href="#"
+          onclick="Auth.logout()"
+          style="
+            color:#fff;
+            text-decoration:underline;
+          "
+        >
+          Logout
+        </a>
+
+      </div>
+
+
+    </aside>
+
+
+
+    <!-- ==================================================
+         MAIN CONTENT
+         ================================================== -->
+
+    <main class="main">
+
+
+      <!-- TOP BAR -->
+
+      <div class="topbar">
+
+        <div>
+
+          <h2>
+            My Collection Route
+          </h2>
+
+          <div class="subtitle">
+            Follow your assigned collection route
+          </div>
+
+        </div>
+
+
+        <!-- GPS CONTROLS -->
+
+        <div class="tracking-controls">
+
+          <button
+            id="startTrackingBtn"
+            onclick="startTracking()"
+          >
+            📍 Start Route
+          </button>
+
+
+          <button
+            id="stopTrackingBtn"
+            class="btn-danger"
+            onclick="stopTracking()"
+            style="display:none"
+          >
+            ⛔ Stop Route
+          </button>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- ==================================================
+           ROUTE STATUS
+           ================================================== -->
+
+      <div class="panel tracking-status">
+
+
+        <div>
+
+          <h3>
+            📍 Route Tracking
+          </h3>
+
+          <div id="trackingStatus">
+            Route not started
+          </div>
+
+        </div>
+
+
+        <div class="route-progress">
+
+          <div id="routeProgressText">
+            0 / 0 completed
+          </div>
+
+
+          <div class="fill-bar-track">
+
+            <div
+              id="routeProgressBar"
+              class="fill-bar"
+              style="width:0%"
+            ></div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+
+
+
+      <!-- ==================================================
+           COLLECTION ROUTE
+           ================================================== -->
+
+      <div class="panel">
+
+        <h3>
+          🚛 Collection Route
+        </h3>
+
+
+        <div id="routeCards"></div>
+
+
+        <div
+          id="emptyState"
+          class="empty-state"
+          style="display:none"
+        >
+          No collections assigned yet.
+        </div>
+
+      </div>
+
+
+
+      <!-- ==================================================
+           COLLECTION TABLE
+           ================================================== -->
+
+      <div class="panel">
+
+        <h3>
+          Collection Jobs
+        </h3>
+
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Bin
+              </th>
+
+              <th>
+                Scheduled
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Notes
+              </th>
+
+              <th>
+                Action
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody id="jobRows"></tbody>
+
+        </table>
+
+      </div>
+
+
+    </main>
+
+  </div>
+
+
+
+  <!-- ==================================================
+       JAVASCRIPT
+       ================================================== -->
+
+  <script src="../js/api.js"></script>
+
+  <script src="../js/collector.js"></script>
+
+
+</body>
+
+</html>

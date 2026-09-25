@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Smart Waste Management System</title>
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <div class="auth-shell">
+
+    <div class="auth-card">
+
+      <!-- BRAND -->
+      <div class="brand">
+
+        <div class="logo">
+          ♻
+        </div>
+
+        <div>
+          <h1>Smart Waste</h1>
+          <span>Management System</span>
+        </div>
+
+      </div>
+
+
+      <!-- LOGIN / REGISTER TABS -->
+      <div class="tab-switch">
+
+        <button
+          id="tabLogin"
+          class="active"
+          onclick="switchTab('login')"
+        >
+          Login
+        </button>
+
+        <button
+          id="tabRegister"
+          onclick="switchTab('register')"
+        >
+          Register
+        </button>
+
+      </div>
+
+
+      <div
+        class="error-msg"
+        id="errorMsg"
+      ></div>
+
+
+      <!-- ================= LOGIN ================= -->
+
+      <form id="loginForm">
+
+        <label for="loginEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="loginEmail"
+          required
+          placeholder="you@example.com"
+        />
+
+
+        <label for="loginPassword">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="loginPassword"
+          required
+          placeholder="••••••••"
+        />
+
+
+        <button
+          type="submit"
+          style="width:100%"
+        >
+          Login
+        </button>
+
+      </form>
+
+
+      <!-- ================= REGISTER ================= -->
+
+      <form
+        id="registerForm"
+        style="display:none"
+      >
+
+        <label for="regName">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="regName"
+          required
+          placeholder="Jane Doe"
+        />
+
+
+        <label for="regEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="regEmail"
+          required
+          placeholder="you@example.com"
+        />
+
+
+        <label for="regPhone">
+          Phone
+        </label>
+
+        <input
+          type="text"
+          id="regPhone"
+          required
+          placeholder="9990000000"
+        />
+
+
+        <!-- ROLE -->
+
+        <label for="regRole">
+          Register as
+        </label>
+
+        <div class="zone-select-wrap">
+
+          <span class="zone-select-icon">
+            👤
+          </span>
+
+          <select id="regRole">
+
+            <option value="Citizen">
+              Citizen
+            </option>
+
+            <option value="Collector">
+              Waste Collector
+            </option>
+
+            <option value="Admin">
+              Administrator
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- ZONE -->
+
+        <label for="regZone">
+          Assigned Zone
+        </label>
+
+        <div class="zone-select-wrap">
+
+          <span class="zone-select-icon">
+            📍
+          </span>
+
+          <select
+            id="regZone"
+            required
+          >
+
+            <option
+              value=""
+              disabled
+              selected
+            >
+              Select your zone
+            </option>
+
+            <option value="Zone A">
+              Zone A
+            </option>
+
+            <option value="Zone B">
+              Zone B
+            </option>
+
+            <option value="Zone C">
+              Zone C
+            </option>
+
+            <option value="Zone D">
+              Zone D
+            </option>
+
+            <option value="Zone E">
+              Zone E
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="zone-help">
+          Select the zone where you live or work.
+        </div>
+
+
+        <!-- PASSWORD -->
+
+        <label for="regPassword">
+          Password
+        </label>
+
+        <input
+          type="password"
+          id="regPassword"
+          required
+          placeholder="••••••••"
+        />
+
+
+        <button
+          type="submit"
+          style="width:100%"
+        >
+          Create Account
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <script src="js/api.js"></script>
+
+  <script>
+
+    /* =====================================================
+       REDIRECT IF ALREADY LOGGED IN
+       ===================================================== */
+
+    (function redirectIfLoggedIn() {
+
+      const user = Auth.getUser();
+
+      if (user && Auth.getToken()) {
+
+        routeToDashboard(user.role);
+
+      }
+
+    })();
+
+
+    /* =====================================================
+       DASHBOARD ROUTING
+       ===================================================== */
+
+    function routeToDashboard(role) {
+
+      if (role === "Admin") {
+
+        window.location.href =
+          "pages/admin.html";
+
+      } else if (role === "Collector") {
+
+        window.location.href =
+          "pages/collector.html";
+
+      } else {
+
+        window.location.href =
+          "pages/dashboard.html";
+
+      }
+
+    }
+
+
+    /* =====================================================
+       SWITCH LOGIN / REGISTER
+       ===================================================== */
+
+    function switchTab(tab) {
+
+      document
+        .getElementById("tabLogin")
+        .classList
+        .toggle(
+          "active",
+          tab === "login"
+        );
+
+      document
+        .getElementById("tabRegister")
+        .classList
+        .toggle(
+          "active",
+          tab === "register"
+        );
+
+
+      document
+        .getElementById("loginForm")
+        .style.display =
+          tab === "login"
+            ? "block"
+            : "none";
+
+
+      document
+        .getElementById("registerForm")
+        .style.display =
+          tab === "register"
+            ? "block"
+            : "none";
+
+
+      document
+        .getElementById("errorMsg")
+        .classList
+        .remove("show");
+
+    }
+
+
+    /* =====================================================
+       ERROR
+       ===================================================== */
+
+    function showError(message) {
+
+      const el =
+        document.getElementById("errorMsg");
+
+      el.textContent =
+        message;
+
+      el.classList.add("show");
+
+    }
+
+
+    /* =====================================================
+       LOGIN
+       ===================================================== */
+
+    document
+      .getElementById("loginForm")
+      .addEventListener(
+        "submit",
+        async (e) => {
+
+          e.preventDefault();
+
+          try {
+
+            const data =
+              await apiRequest(
+                "/auth/login",
+                {
+                  method: "POST",
+                  auth: false,
+
+                  body: {
+
+                    email:
+                      document
+                        .getElementById("loginEmail")
+                        .value,
+
+                    password:
+                      document
+                        .getElementById("loginPassword")
+                        .value
+
+                  }
+
+                }
+              );
+
+
+            Auth.setSession(
+              data.token,
+              data.user
+            );
+
+
+            routeToDashboard(
+              data.user.role
+            );
+
+
+          } catch (err) {
+
+            showError(
+              err.message
+            );
+
+          }
+
+        }
+      );
+
+
+    /* =====================================================
+       REGISTER
+       ===================================================== */
+
+    document
+      .getElementById("registerForm")
+      .addEventListener(
+        "submit",
+        async (e) => {
+
+          e.preventDefault();
+
+          try {
+
+            const data =
+              await apiRequest(
+                "/auth/register",
+                {
+                  method: "POST",
+                  auth: false,
+
+                  body: {
+
+                    full_name:
+                      document
+                        .getElementById("regName")
+                        .value,
+
+                    email:
+                      document
+                        .getElementById("regEmail")
+                        .value,
+
+                    phone:
+                      document
+                        .getElementById("regPhone")
+                        .value,
+
+                    role:
+                      document
+                        .getElementById("regRole")
+                        .value,
+
+                    zone:
+                      document
+                        .getElementById("regZone")
+                        .value,
+
+                    password:
+                      document
+                        .getElementById("regPassword")
+                        .value
+
+                  }
+
+                }
+              );
+
+
+            Auth.setSession(
+              data.token,
+              data.user
+            );
+
+
+            routeToDashboard(
+              data.user.role
+            );
+
+
+          } catch (err) {
+
+            showError(
+              err.message
+            );
+
+          }
+
+        }
+      );
+
+  </script>
+
+</body>
+
+</html>
