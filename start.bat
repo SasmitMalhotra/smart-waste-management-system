@@ -1,9 +1,19 @@
 @echo off
 cd /d "%~dp0backend"
 
-call venv\Scripts\activate.bat
+if not exist "venv\Scripts\python.exe" (
+    echo.
+    echo Creating Python virtual environment...
+    python -m venv venv
 
-start "" python app.py
+    echo.
+    echo Installing project requirements...
+    venv\Scripts\python.exe -m pip install -r requirements.txt
+)
+
+echo.
+echo Starting Smart Waste Management System...
+start "" venv\Scripts\python.exe app.py
 
 timeout /t 3 /nobreak >nul
 
